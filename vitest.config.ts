@@ -7,7 +7,7 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.ts'],
 		exclude: ['node_modules', 'build', 'tmp'],
 		typecheck: {
-			tsconfig: './tsconfig.spec.json',
+			tsconfig: './tsconfig.test.json',
 		},
 		coverage: {
 			provider: 'v8',

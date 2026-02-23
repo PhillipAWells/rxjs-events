@@ -25,11 +25,11 @@ import globals from 'globals';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/** TypeScript import resolver — points at this project's tsconfig.lib.json */
+/** TypeScript import resolver — points at this project's tsconfig.eslint.json */
 const IMPORT_RESOLVER = {
 	typescript: {
 		alwaysTryTypes: true,
-		project: './tsconfig.lib.json',
+		project: './tsconfig.eslint.json',
 	},
 	node: {
 		extensions: ['.js', '.ts'],
@@ -339,7 +339,7 @@ export default [
 				// Disable projectService (set by the base config) and use the
 				// spec tsconfig directly, so spec files are properly included.
 				projectService: false,
-				project: './tsconfig.spec.json',
+				project: './tsconfig.test.json',
 				tsconfigRootDir: __dirname,
 			},
 			globals: {
