@@ -1,7 +1,7 @@
 {
 	"name": "@pawells/rxjs-events",
 	"displayName": "RxJS Events",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "RxJS-based event handling library with reactive observables and async event streams.",
 	"type": "module",
 	"main": "./build/index.js",
