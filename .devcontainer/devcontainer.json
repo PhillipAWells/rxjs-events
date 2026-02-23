@@ -1,16 +1,17 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
 	"name": "pawells-rxjs-events",
-	"image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
 	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {},
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts"
 		}
 	},
-	"postCreateCommand": "yarn install",
+	"postCreateCommand": "bash .devcontainer/scripts/postCreate.sh",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -21,8 +22,6 @@
 			]
 		}
 	},
-	"remoteUser": "node",
-	"remoteEnv": {
-		"NODE_OPTIONS": "--experimental-vm-modules --no-warnings"
-	}
+	"remoteUser": "dev",
+	"updateRemoteUserUID": true
 }
