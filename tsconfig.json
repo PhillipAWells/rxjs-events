@@ -12,7 +12,8 @@
 		"strictNullChecks": true,
 		"strictFunctionTypes": true,
 		"lib": [
-			"ES2022"
+			"ES2022",
+			"ESNext"
 		]
 	}
 }

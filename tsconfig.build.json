@@ -5,7 +5,8 @@
 		"rootDir": "./src",
 		"declaration": true,
 		"declarationMap": true,
-		"sourceMap": true
+		"sourceMap": true,
+		"types": ["node"]
 	},
 	"include": [
 		"src/**/*"
@@ -13,7 +14,6 @@
 	"exclude": [
 		"node_modules",
 		"build",
-		"**/*.test.ts",
 		"**/*.spec.ts",
 		"src/mocks/**",
 		"src/tests/**"
