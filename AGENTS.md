@@ -17,11 +17,11 @@ yarn lint             # ESLint src/
 yarn lint:fix         # ESLint with auto-fix
 yarn test             # Run Vitest tests
 yarn test:ui          # Open interactive Vitest UI in a browser
-yarn test:coverage    # Run tests with coverage report
+yarn test:coverage    # Run tests with coverage report (80% threshold)
 yarn start            # Run built output
 ```
 
-To run a single test file: `yarn vitest run src/path/to/file.test.ts`
+To run a single test file: `yarn vitest run src/path/to/file.spec.ts`
 
 ## Architecture
 
@@ -90,7 +90,14 @@ interface UserCreatedEvent extends TEventData {
 
 ## TypeScript Configuration
 
-Requires Node.js 22+. Outputs to `./build/`, targets ES2022, module resolution `bundler`. Declaration files (`.d.ts`) and source maps are emitted alongside JS. Strict mode is fully enabled (`strict`, `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`).
+Project uses a 4-config split:
+
+- **`tsconfig.json`** — Base/development configuration used by Vitest and editors. Includes all source files for full type checking.
+- **`tsconfig.build.json`** — Production build configuration that extends `tsconfig.json`, explicitly excludes test files (`src/**/*.spec.ts`), and is used only by the build script.
+- **`tsconfig.test.json`** — Vitest test configuration.
+- **`tsconfig.eslint.json`** — ESLint type-aware linting configuration.
+
+General configuration: Requires Node.js >= 24.0.0. Outputs to `./build/`, targets ES2022, module resolution `bundler`. Declaration files (`.d.ts`) and source maps are emitted alongside JS. Strict mode is fully enabled (`strict`, `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`).
 
 ## CI/CD
 
