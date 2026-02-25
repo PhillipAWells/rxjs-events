@@ -1,38 +1,7 @@
+import { ObjectGetPropertyByPath } from '@pawells/typescript-common';
 import { TEventData } from './event-data.js';
 import { IFilterCriteria } from './filter-criteria.js';
 import { TExtractEventPayload } from './extract-event-payload.js';
-
-/**
- * Gets a nested property from an object using dot notation path.
- * Safely handles null/undefined intermediate values.
- *
- * @param obj - Object to traverse
- * @param path - Property path using dot notation (e.g., 'user.profile.role')
- * @param defaultValue - Value to return if path doesn't exist
- * @returns The value at the path or default value
- */
-function GetPropertyByPath(obj: any, path: string, defaultValue?: any): any {
-	if (!obj || !path) {
-		return defaultValue;
-	}
-
-	const keys = path.split('.');
-	let result = obj;
-
-	for (const key of keys) {
-		if (result === null || result === undefined || typeof result !== 'object') {
-			return defaultValue;
-		}
-
-		if (!Object.prototype.hasOwnProperty.call(result, key)) {
-			return defaultValue;
-		}
-
-		result = result[key];
-	}
-
-	return result === undefined ? defaultValue : result;
-}
 
 /**
  * Filters events based on payload property matching criteria.
@@ -118,7 +87,7 @@ export function EventFilter<TEvent extends TEventData = TEventData>(
 
 	for (const [key, filterValue] of Object.entries(args)) {
 		// Support nested paths using dot notation
-		const payloadValue = GetPropertyByPath(payload as Record<string, unknown>, key);
+		const payloadValue = ObjectGetPropertyByPath(payload as Record<string, unknown>, key);
 
 		// Support predicate functions as filter values
 		if (typeof filterValue === 'function') {

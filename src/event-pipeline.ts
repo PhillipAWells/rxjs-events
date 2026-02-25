@@ -1,3 +1,4 @@
+import { Debounce, Pipe, Throttle } from '@pawells/typescript-common';
 import { EventHandler } from './handler.js';
 import { TEventData } from './event-data.js';
 
@@ -32,21 +33,10 @@ export function DebounceEvents<TObject extends object = object, TEvent extends T
 	ms: number,
 ): EventHandler<TObject, TEvent> {
 	const debouncedHandler = new EventHandler<TObject, TEvent>(handler.Name);
-	let timer: ReturnType<typeof setTimeout> | undefined;
-	let lastEvent: TEvent | undefined;
-
-	handler.Subscribe((event) => {
-		lastEvent = event;
-		clearTimeout(timer);
-
-		timer = setTimeout(() => {
-			if (lastEvent) {
-				debouncedHandler.Trigger(lastEvent as any);
-			}
-			timer = undefined;
-		}, ms);
-	});
-
+	const debouncedTrigger = Debounce((event: TEvent) => {
+		debouncedHandler.Trigger(event as any);
+	}, ms);
+	handler.Subscribe((event) => debouncedTrigger(event));
 	return debouncedHandler;
 }
 
@@ -81,31 +71,10 @@ export function ThrottleEvents<TObject extends object = object, TEvent extends T
 	ms: number,
 ): EventHandler<TObject, TEvent> {
 	const throttledHandler = new EventHandler<TObject, TEvent>(handler.Name);
-	let lastCall = 0;
-	let timer: ReturnType<typeof setTimeout> | undefined;
-	let lastEvent: TEvent | undefined;
-
-	handler.Subscribe((event) => {
-		const now = Date.now();
-		const remaining = ms - (now - lastCall);
-		lastEvent = event;
-
-		if (remaining <= 0) {
-			clearTimeout(timer);
-			timer = undefined;
-			lastCall = now;
-			throttledHandler.Trigger(event as any);
-		} else {
-			timer ??= setTimeout(() => {
-				lastCall = Date.now();
-				timer = undefined;
-				if (lastEvent) {
-					throttledHandler.Trigger(lastEvent as any);
-				}
-			}, remaining);
-		}
-	});
-
+	const throttledTrigger = Throttle((event: TEvent) => {
+		throttledHandler.Trigger(event as any);
+	}, ms);
+	handler.Subscribe((event) => throttledTrigger(event));
 	return throttledHandler;
 }
 
@@ -148,22 +117,14 @@ export function PipeEvents<TEvent extends TEventData = TEventData, TResult = any
 ): AsyncIterableIterator<TResult> {
 	return (async function* (): AsyncIterableIterator<TResult> {
 		if (fns.length === 0) {
-			// If no functions provided, just yield the events themselves
 			for await (const event of handler) {
 				yield event as any as TResult;
 			}
 			return;
 		}
-
+		const pipeline = Pipe(...(fns as [any, ...any[]]));
 		for await (const event of handler) {
-			let value: any = event;
-
-			// Apply each function in sequence
-			for (const fn of fns) {
-				value = fn(value);
-			}
-
-			yield value as TResult;
+			yield pipeline(event) as TResult;
 		}
 	})();
 }
