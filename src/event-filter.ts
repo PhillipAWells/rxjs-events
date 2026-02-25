@@ -3,12 +3,49 @@ import { IFilterCriteria } from './filter-criteria.js';
 import { TExtractEventPayload } from './extract-event-payload.js';
 
 /**
+ * Gets a nested property from an object using dot notation path.
+ * Safely handles null/undefined intermediate values.
+ *
+ * @param obj - Object to traverse
+ * @param path - Property path using dot notation (e.g., 'user.profile.role')
+ * @param defaultValue - Value to return if path doesn't exist
+ * @returns The value at the path or default value
+ */
+function GetPropertyByPath(obj: any, path: string, defaultValue?: any): any {
+	if (!obj || !path) {
+		return defaultValue;
+	}
+
+	const keys = path.split('.');
+	let result = obj;
+
+	for (const key of keys) {
+		if (result === null || result === undefined || typeof result !== 'object') {
+			return defaultValue;
+		}
+
+		if (!Object.prototype.hasOwnProperty.call(result, key)) {
+			return defaultValue;
+		}
+
+		result = result[key];
+	}
+
+	return result === undefined ? defaultValue : result;
+}
+
+/**
  * Filters events based on payload property matching criteria.
  * Performs strict equality comparison between event payload properties and filter arguments.
+ * Supports nested property paths using dot notation and predicate functions.
  *
  * @template TEvent - The event data type extending TEventData
  * @param event - The event to filter, must have exactly one property representing the event type
- * @param args - Filter criteria object with property-value pairs to match against the event payload
+ * @param args - Filter criteria object with property-value pairs to match against the event payload.
+ *              Values can be:
+ *              - Primitives: matched via strict equality
+ *              - Functions: treated as predicates that must return true
+ *              - Keys can use dot notation for nested paths (e.g., 'user.profile.role')
  * @returns true if the event matches all filter criteria or if no filter is provided, false otherwise
  *
  * @throws {Error} 'No Event' - When event is null or undefined
@@ -22,20 +59,36 @@ import { TExtractEventPayload } from './extract-event-payload.js';
  *     userId: string;
  *     username: string;
  *     role: string;
+ *     profile: {
+ *       age: number;
+ *       status: string;
+ *     };
  *   };
  * }
  *
  * const event: UserEvent = {
- *   UserCreated: { userId: '123', username: 'john', role: 'admin' }
+ *   UserCreated: {
+ *     userId: '123',
+ *     username: 'john',
+ *     role: 'admin',
+ *     profile: { age: 30, status: 'active' }
+ *   }
  * };
  *
  * // Match by single property
  * EventFilter(event, { role: 'admin' }); // true
  * EventFilter(event, { role: 'user' }); // false
  *
- * // Match by multiple properties
- * EventFilter(event, { username: 'john', role: 'admin' }); // true
- * EventFilter(event, { username: 'john', role: 'user' }); // false
+ * // Match by nested path
+ * EventFilter(event, { 'profile.age': 30 }); // true
+ * EventFilter(event, { 'profile.status': 'active' }); // true
+ *
+ * // Match by predicate function
+ * EventFilter(event, { 'profile.age': (v) => v > 18 }); // true
+ * EventFilter(event, { role: (r) => r === 'admin' }); // true
+ *
+ * // Multiple criteria
+ * EventFilter(event, { role: 'admin', 'profile.age': (v) => v > 18 }); // true
  *
  * // No filter (always passes)
  * EventFilter(event, null); // true
@@ -64,11 +117,48 @@ export function EventFilter<TEvent extends TEventData = TEventData>(
 	if (!payload) throw new Error('No Payload');
 
 	for (const [key, filterValue] of Object.entries(args)) {
-		// Type-safe property access with proper unknown handling
-		const payloadValue = (payload as Record<string, unknown>)[key];
+		// Support nested paths using dot notation
+		const payloadValue = GetPropertyByPath(payload as Record<string, unknown>, key);
 
-		if (payloadValue !== filterValue) return false;
+		// Support predicate functions as filter values
+		if (typeof filterValue === 'function') {
+			const predicate = filterValue as (value: unknown) => boolean;
+			if (!predicate(payloadValue)) return false;
+		} else {
+			// Standard equality check
+			if (payloadValue !== filterValue) return false;
+		}
 	}
 
 	return true;
+}
+
+/**
+ * Partitions an event into matching and non-matching tuples based on filter criteria.
+ * Uses EventFilter internally to apply the filtering logic.
+ *
+ * @template TEvent - The event data type extending TEventData
+ * @param event - The event to partition
+ * @param args - Filter criteria (same as EventFilter)
+ * @returns Tuple of [matching event, non-matching event] where non-matching is null if event matches
+ *
+ * @example
+ * ```typescript
+ * const event: UserEvent = {
+ *   UserCreated: { userId: '123', username: 'john', role: 'admin' }
+ * };
+ *
+ * const [match, noMatch] = PartitionEventFilter(event, { role: 'admin' });
+ * // match = event, noMatch = null
+ *
+ * const [match2, noMatch2] = PartitionEventFilter(event, { role: 'user' });
+ * // match2 = null, noMatch2 = event
+ * ```
+ */
+export function PartitionEventFilter<TEvent extends TEventData = TEventData>(
+	event: TEvent,
+	args: IFilterCriteria | null | undefined,
+): [TEvent | null, TEvent | null] {
+	const matches = EventFilter(event, args);
+	return matches ? [event, null] : [null, event];
 }
