@@ -7,3 +7,6 @@ export * from './event-filter.js';
 // IAsyncGeneratorESN is an implementation detail of AsyncObservable; not re-exported here.
 export * from './handler.js';
 export * from './async-observable.js';
+export * from './event-operators.js';
+export * from './event-pipeline.js';
+export * from './nestjs-pubsub.js';

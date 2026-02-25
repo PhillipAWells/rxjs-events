@@ -218,7 +218,7 @@ export class AsyncObservable<T> extends Observable<T> {
 				subscription?.unsubscribe();
 				// Resolve all pending next() promises so callers are not left hanging.
 				handleComplete();
-				return Promise.resolve({ done: true, value: null });
+				return Promise.resolve({ done: true, value: undefined });
 			},
 
 			throw: (err): Promise<IteratorResult<T>> => {
