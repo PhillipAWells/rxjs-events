@@ -359,4 +359,40 @@ export class EventHandler<TObject extends object = object, TEvent extends TEvent
 		this._subscriptions.clear();
 		this._AvailableIds.clear();
 	}
+
+	/**
+	 * Gets the total count of active subscriptions.
+	 *
+	 * @returns The number of currently active subscriptions
+	 *
+	 * @example
+	 * ```typescript
+	 * const handler = new EventHandler('TestEvent');
+	 * handler.Subscribe((event) => { });
+	 * handler.Subscribe((event) => { });
+	 * console.log(handler.GetSubscriptionCount()); // 2
+	 * ```
+	 */
+	public GetSubscriptionCount(): number {
+		return this._subscriptions.size;
+	}
+
+	/**
+	 * Gets all subscription IDs that are currently active.
+	 * The returned array is a snapshot of active IDs at the time of the call.
+	 *
+	 * @returns Array of active subscription IDs
+	 *
+	 * @example
+	 * ```typescript
+	 * const handler = new EventHandler('TestEvent');
+	 * const id1 = handler.Subscribe((event) => { });
+	 * const id2 = handler.Subscribe((event) => { });
+	 * const ids = handler.GetActiveSubscriptionIds();
+	 * console.log(ids); // [0, 1] or similar
+	 * ```
+	 */
+	public GetActiveSubscriptionIds(): number[] {
+		return Array.from(this._subscriptions.keys());
+	}
 }
