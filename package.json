@@ -1,7 +1,7 @@
 {
 	"name": "@pawells/rxjs-events",
 	"displayName": "RxJS Events",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "RxJS-based event handling library with reactive observables and async event streams.",
 	"type": "module",
 	"main": "./build/index.js",
@@ -27,7 +27,7 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@pawells/typescript-common": "file:../typescript-common",
+		"@pawells/typescript-common": "^1.1.6",
 		"rxjs": "^7.8.2"
 	},
 	"devDependencies": {
