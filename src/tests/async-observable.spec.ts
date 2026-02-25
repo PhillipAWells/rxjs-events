@@ -218,7 +218,7 @@ describe('AsyncObservable', () => {
 
 			const returnResult = await iterator.return();
 			expect(returnResult.done).toBe(true);
-			expect(returnResult.value).toBe(null); // return() itself yields null per implementation
+			expect(returnResult.value).toBeUndefined(); // return() yields undefined per AsyncIterator protocol
 
 			const nextResult = await nextPromise;
 			expect(nextResult.done).toBe(true);
