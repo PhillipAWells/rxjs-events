@@ -53,7 +53,7 @@ export function EventFilter<TEvent extends TEventData = TEventData>(
 	// Identify Payload Key
 	const eventKeys = Object.keys(event);
 
-	if (eventKeys.length === 0) throw new Error('No payload structure.');
+	if (eventKeys.length === 0) throw new Error('Event object must have exactly one top-level key, but received an empty object ({}).');
 	if (eventKeys.length > 1) throw new Error('More than one payload structure.');
 
 	const eventKey = eventKeys[0] as keyof TEvent;

@@ -100,7 +100,7 @@ describe('EventFilter', () => {
 	});
 
 	it('should throw an error when event has no keys', () => {
-		expect(() => EventFilter({} as any, { prop: 'value' })).toThrow('No payload structure.');
+		expect(() => EventFilter({} as any, { prop: 'value' })).toThrow('Event object must have exactly one top-level key, but received an empty object ({}).');
 	});
 
 	it('should throw an error when event has more than one key', () => {
