@@ -1,5 +1,5 @@
 
-import { TEventData , EventFilter } from '../index.js';
+import { TEventData, EventFilter, PartitionEventFilter } from '../index.js';
 
 // Define test event interfaces
 type TUserCreatedEvent = TEventData & {
@@ -100,7 +100,7 @@ describe('EventFilter', () => {
 	});
 
 	it('should throw an error when event has no keys', () => {
-		expect(() => EventFilter({} as any, { prop: 'value' })).toThrow('No payload structure.');
+		expect(() => EventFilter({} as any, { prop: 'value' })).toThrow('Event object must have exactly one top-level key, but received an empty object ({}).');
 	});
 
 	it('should throw an error when event has more than one key', () => {
@@ -188,7 +188,7 @@ describe('EventFilter', () => {
 		expect(EventFilter(event, { isActive: 1 })).toBe(false);
 	});
 
-	it('should not support filtering by nested properties', () => {
+	it('should support filtering by nested properties using dot notation', () => {
 		const event = {
 			ComplexEvent: {
 				user: {
@@ -199,7 +199,148 @@ describe('EventFilter', () => {
 				},
 			},
 		};
-		// This will return false as the filter tries to match a top-level property named "user.details.name"
+		// Now supports nested property access
+		expect(EventFilter(event as any, { 'user.details.name': 'Test User' })).toBe(true);
+		expect(EventFilter(event as any, { 'user.id': '123' })).toBe(true);
+		expect(EventFilter(event as any, { 'user.details.name': 'Wrong User' })).toBe(false);
+	});
+
+	it('should support predicate functions as filter values', () => {
+		const event: TUserCreatedEvent = {
+			UserCreated: {
+				email: 'test@example.com',
+				role: 'admin',
+				userId: '123',
+				username: 'testuser',
+			},
+		};
+
+		// String predicate
+		expect(EventFilter(event, { role: (r: unknown) => r === 'admin' })).toBe(true);
+		expect(EventFilter(event, { role: (r: unknown) => r === 'user' })).toBe(false);
+
+		// Multiple predicates
+		expect(EventFilter(event, {
+			role: (r: unknown) => r === 'admin',
+			username: (u: unknown) => (u as string).startsWith('test'),
+		})).toBe(true);
+	});
+
+	it('should combine nested paths with predicate functions', () => {
+		const event = {
+			ComplexEvent: {
+				user: {
+					details: {
+						age: 30,
+					},
+					id: '123',
+				},
+			},
+		};
+
+		// Nested property with predicate
+		expect(EventFilter(event as any, { 'user.details.age': (a: unknown) => (a as number) > 18 })).toBe(true);
+		expect(EventFilter(event as any, { 'user.details.age': (a: unknown) => (a as number) < 18 })).toBe(false);
+
+		// Mix of equality and predicate
+		expect(EventFilter(event as any, {
+			'user.id': '123',
+			'user.details.age': (a: unknown) => (a as number) >= 30,
+		})).toBe(true);
+	});
+
+	it('should handle missing nested paths gracefully', () => {
+		const event = {
+			ComplexEvent: {
+				user: {
+					id: '123',
+				},
+			},
+		};
+
+		// Missing nested property should not match
 		expect(EventFilter(event as any, { 'user.details.name': 'Test User' })).toBe(false);
+
+		// Predicate on missing path should not match
+		expect(EventFilter(event as any, { 'user.details.age': (a: unknown) => (a as number) > 18 })).toBe(false);
+	});
+
+	it('should support predicates on top-level properties', () => {
+		const event: TItemUpdatedEvent = {
+			ItemUpdated: {
+				isActive: true,
+				itemId: 456,
+				name: 'Test Item',
+				quantity: 10,
+			},
+		};
+
+		expect(EventFilter(event, { quantity: (q: unknown) => (q as number) > 5 })).toBe(true);
+		expect(EventFilter(event, { quantity: (q: unknown) => (q as number) < 5 })).toBe(false);
+		expect(EventFilter(event, { isActive: (a: unknown) => a === true })).toBe(true);
+	});
+});
+
+describe('PartitionEventFilter', () => {
+	it('should partition event based on filter criteria', () => {
+		const event: TUserCreatedEvent = {
+			UserCreated: {
+				email: 'test@example.com',
+				role: 'admin',
+				userId: '123',
+				username: 'testuser',
+			},
+		};
+
+		const [match, noMatch] = PartitionEventFilter(event, { role: 'admin' });
+		expect(match).toEqual(event);
+		expect(noMatch).toBeNull();
+	});
+
+	it('should partition event when it does not match', () => {
+		const event: TUserCreatedEvent = {
+			UserCreated: {
+				email: 'test@example.com',
+				role: 'admin',
+				userId: '123',
+				username: 'testuser',
+			},
+		};
+
+		const [match, noMatch] = PartitionEventFilter(event, { role: 'user' });
+		expect(match).toBeNull();
+		expect(noMatch).toEqual(event);
+	});
+
+	it('should work with nested paths', () => {
+		const event = {
+			ComplexEvent: {
+				user: {
+					details: {
+						age: 30,
+					},
+					id: '123',
+				},
+			},
+		};
+
+		const [match, noMatch] = PartitionEventFilter(event, { 'user.details.age': 30 });
+		expect(match).toEqual(event);
+		expect(noMatch).toBeNull();
+	});
+
+	it('should work with predicate functions', () => {
+		const event: TItemUpdatedEvent = {
+			ItemUpdated: {
+				isActive: true,
+				itemId: 456,
+				name: 'Test Item',
+				quantity: 10,
+			},
+		};
+
+		const [match, noMatch] = PartitionEventFilter(event, { quantity: (q: unknown) => (q as number) > 5 });
+		expect(match).toEqual(event);
+		expect(noMatch).toBeNull();
 	});
 });
