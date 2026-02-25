@@ -116,6 +116,7 @@ export class EventHandlerPubSub implements IPubSubEngine {
 	 * @param payload - The payload to publish
 	 */
 	public async publish(triggerName: string, payload: any): Promise<void> {
+		await Promise.resolve();
 		const handler = this._getOrCreateHandler(triggerName);
 		handler.Trigger(payload);
 	}
@@ -140,7 +141,8 @@ export class EventHandlerPubSub implements IPubSubEngine {
 		const externalSubId = this._nextSubscriptionId++;
 		this._subscriptions.set(externalSubId, [handler, handlerSubId]);
 
-		return Promise.resolve(externalSubId);
+		await Promise.resolve();
+		return externalSubId;
 	}
 
 	/**

@@ -107,13 +107,13 @@ describe('PartitionEvents', () => {
 
 		// Even IDs should be in matching
 		if (matching.length > 0) {
-			const id = matching[0].TestEvent.id;
+			const { id } = matching[0].TestEvent;
 			expect(id % 2).toBe(0);
 		}
 
 		// Odd IDs should be in nonMatching
 		if (nonMatching.length > 0) {
-			const id = nonMatching[0].TestEvent.id;
+			const { id } = nonMatching[0].TestEvent;
 			expect(id % 2).toBe(1);
 		}
 	});

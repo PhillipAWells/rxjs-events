@@ -58,7 +58,7 @@ describe('EventHandler Subscription Introspection', () => {
 		});
 
 		it('should not change when unsubscribing non-existent ID', () => {
-			const sub1 = handler.Subscribe(() => {
+			const _sub1 = handler.Subscribe(() => {
 				// handler
 			});
 
@@ -143,12 +143,12 @@ describe('EventHandler Subscription Introspection', () => {
 		});
 
 		it('should be a snapshot (not mutable)', () => {
-			const sub1 = handler.Subscribe(() => {
+			const _sub1 = handler.Subscribe(() => {
 				// handler
 			});
 
 			const ids1 = handler.GetActiveSubscriptionIds();
-			const sub2 = handler.Subscribe(() => {
+			const _sub2 = handler.Subscribe(() => {
 				// handler
 			});
 
