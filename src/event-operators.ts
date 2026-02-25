@@ -138,6 +138,7 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 			},
 
 			async return(): Promise<IteratorResult<TEvent>> {
+				await Promise.resolve();
 				closed = true;
 				handler.Unsubscribe(subscriptionId);
 				return { done: true, value: undefined };
