@@ -1,6 +1,6 @@
 
 /**
- * @fileoverview Integration tests for JTV Events Mocks package
+ * @fileoverview Integration tests for Events Mocks package
  * Tests comprehensive scenarios where mock utilities work together
  */
 
