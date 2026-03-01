@@ -23,11 +23,12 @@
 		"test": "vitest run",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
+		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build",
 		"prepublishOnly": "npm run build",
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@pawells/typescript-common": "^1.1.6",
+		"@pawells/typescript-common": "^1.1.7",
 		"rxjs": "^7.8.2"
 	},
 	"devDependencies": {
