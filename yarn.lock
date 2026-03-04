@@ -435,7 +435,7 @@ __metadata:
   resolution: "@pawells/rxjs-events@workspace:."
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@pawells/typescript-common": "npm:^1.1.6"
+    "@pawells/typescript-common": "npm:^1.1.7"
     "@stylistic/eslint-plugin": "npm:^5.9.0"
     "@types/node": "npm:^25.3.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.56.1"
@@ -454,10 +454,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pawells/typescript-common@npm:^1.1.6":
-  version: 1.1.6
-  resolution: "@pawells/typescript-common@npm:1.1.6"
-  checksum: 10c0/530f2ff063608a0ab7fc7ea61792a6764600529a0df94175299e59ec4d071b2dda74fac797fa65ad8defbd51e711e8e6bff86f693a6f4e5a4087af4b24e00b08
+"@pawells/typescript-common@npm:^1.1.7":
+  version: 1.1.7
+  resolution: "@pawells/typescript-common@npm:1.1.7"
+  checksum: 10c0/83867c1ad54d804adabd186e402041bfee7c25a559b86f4a1fdd06898f45431ac6dde3c2abfb9a3bdc890b10d4a8fc943c07e26d0f9654a20965d97f84d06c0a
   languageName: node
   linkType: hard
 
