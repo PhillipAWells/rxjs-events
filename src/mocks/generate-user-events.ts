@@ -1,3 +1,4 @@
+import { ArraySample } from '@pawells/typescript-common';
 import { GenerateEventData } from './generate-event-data.js';
 import { MOCK_USER_NAMES, MOCK_DOMAINS, MOCK_ROLES } from './constants.js';
 
@@ -19,13 +20,13 @@ export function GenerateUserEvents(count = 1): Array<{ userCreated: any }> {
 	return GenerateEventData('userCreated', {
 		count,
 		customFields: {
-			Username: () => MOCK_USER_NAMES[Math.floor(Math.random() * MOCK_USER_NAMES.length)]?.toLowerCase() ?? 'user',
+			Username: () => (ArraySample(MOCK_USER_NAMES) ?? 'user').toLowerCase(),
 			Email: () => {
-				const name = MOCK_USER_NAMES[Math.floor(Math.random() * MOCK_USER_NAMES.length)]?.toLowerCase() ?? 'user';
-				const domain = MOCK_DOMAINS[Math.floor(Math.random() * MOCK_DOMAINS.length)] ?? 'example.com';
+				const name = (ArraySample(MOCK_USER_NAMES) ?? 'user').toLowerCase();
+				const domain = ArraySample(MOCK_DOMAINS) ?? 'example.com';
 				return `${name}@${domain}`;
 			},
-			Role: () => MOCK_ROLES[Math.floor(Math.random() * MOCK_ROLES.length)],
+			Role: () => ArraySample(MOCK_ROLES),
 
 			Active: () => Math.random() > ACTIVE_THRESHOLD,
 		},

@@ -28,7 +28,7 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@pawells/typescript-common": "^1.1.7",
+		"@pawells/typescript-common": "^1.4.1",
 		"rxjs": "^7.8.2"
 	},
 	"devDependencies": {

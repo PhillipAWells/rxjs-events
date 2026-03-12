@@ -1,3 +1,4 @@
+import { ArraySample } from '@pawells/typescript-common';
 import { GenerateEventData } from './generate-event-data.js';
 import { MOCK_MESSAGE_CONTENT, MOCK_PRIORITIES, MOCK_CHANNELS } from './constants.js';
 
@@ -17,9 +18,9 @@ export function GenerateMessageEvents(count = 1): Array<{ messageReceived: any }
 	return GenerateEventData('messageReceived', {
 		count,
 		customFields: {
-			Text: () => MOCK_MESSAGE_CONTENT[Math.floor(Math.random() * MOCK_MESSAGE_CONTENT.length)],
-			Priority: () => MOCK_PRIORITIES[Math.floor(Math.random() * MOCK_PRIORITIES.length)],
-			Channel: () => MOCK_CHANNELS[Math.floor(Math.random() * MOCK_CHANNELS.length)],
+			Text: () => ArraySample(MOCK_MESSAGE_CONTENT),
+			Priority: () => ArraySample(MOCK_PRIORITIES),
+			Channel: () => ArraySample(MOCK_CHANNELS),
 		},
 	});
 }
