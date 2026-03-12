@@ -86,8 +86,8 @@ async function processOnce() {
 import { AsyncObservable, BackpressureStrategy } from '@pawells/rxjs-events';
 
 const obs = new AsyncObservable<string>({
-  bufferSize: 100,
-  strategy: BackpressureStrategy.DropOldest,
+  maxBufferSize: 100,
+  overflowStrategy: BackpressureStrategy.DropOldest,
 });
 
 for await (const item of obs) {
@@ -117,14 +117,16 @@ Main event handler class wrapping an RxJS `Subject`.
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
-| `constructor` | `(name: TEvent)` | Creates a handler with the given event name |
-| `Name` | `string` (getter) | Returns the event name |
-| `Subscribe` | `(handler: TEventFunction<TObject[TEvent]>, options?: ISubscriptionOptions) => number` | Subscribes and returns a numeric ID |
-| `Unsubscribe` | `(id: number) => void` | Removes subscription by ID |
-| `Trigger` | `(data: TObject[TEvent]) => void` | Emits the event with the given payload |
+| `constructor` | `(name: string)` | Creates a handler with the given event name (cannot be empty or whitespace-only) |
+| `Name` | `string` (readonly) | Returns the event name |
+| `Subscribe` | `(onEvent: TEventFunction<TEvent>) => number` | Subscribes and returns a numeric ID |
+| `Unsubscribe` | `(subscription: number) => void` | Removes subscription by ID |
+| `Trigger` | `(data: TObject) => void` | Emits the event with the given payload |
 | `Destroy` | `() => void` | Completes the Subject and cleans up all subscriptions |
-| `GetAsyncIterableIterator` | `() => AsyncIterableIterator<TObject[TEvent]>` | Returns an async iterable iterator |
-| `GetAsyncIterator` | `() => IAsyncGeneratorESN<TObject[TEvent]>` | Returns a disposable async generator |
+| `GetAsyncIterableIterator` | `() => AsyncIterableIterator<TEvent>` | Returns an async iterable iterator |
+| `GetAsyncIterator` | `() => AsyncIterator<TEvent>` | Returns an async iterator |
+| `GetSubscriptionCount` | `() => number` | Returns the count of active subscriptions |
+| `GetActiveSubscriptionIds` | `() => number[]` | Returns array of active subscription IDs |
 
 Subscription IDs are recycled internally — allocation is O(1).
 
@@ -132,10 +134,10 @@ Subscription IDs are recycled internally — allocation is O(1).
 
 An `Observable` subclass with a push buffer and configurable backpressure. Implements `Symbol.asyncIterator`.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `bufferSize` | `number` | Maximum number of buffered items |
-| `strategy` | `BackpressureStrategy` | `DropOldest`, `DropNewest`, or `Error` |
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxBufferSize` | `number` | 1000 | Maximum number of buffered items |
+| `overflowStrategy` | `BackpressureStrategy` | `DropOldest` | How to handle buffer overflow: `DropOldest`, `DropNewest`, or `Error` |
 
 Throws `BufferOverflowError` when strategy is `Error` and the buffer is full.
 
