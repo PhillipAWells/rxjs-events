@@ -88,6 +88,9 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 	let matchingResolve: (() => void) | undefined;
 	let nonMatchingResolve: (() => void) | undefined;
 
+	// Track reference count for proper cleanup
+	let activeIterators = 2;
+
 	// Subscribe to the handler and distribute events to appropriate queues
 	const subscriptionId = handler.Subscribe((event) => {
 		if (predicate(event)) {
@@ -139,7 +142,11 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 			async return(): Promise<IteratorResult<TEvent>> {
 				await Promise.resolve();
 				closed = true;
-				handler.Unsubscribe(subscriptionId);
+				activeIterators--;
+				// Only unsubscribe when all iterators have closed
+				if (activeIterators === 0) {
+					handler.Unsubscribe(subscriptionId);
+				}
 				return { done: true, value: undefined };
 			},
 		};
