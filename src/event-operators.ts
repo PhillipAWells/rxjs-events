@@ -150,32 +150,6 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 	const matchingIterator = createIterator(matchingQueue);
 	const nonMatchingIterator = createIterator(nonMatchingQueue);
 
-	// Add destroy handlers to both iterators to clean up when iteration is done
-	Promise.allSettled([
-		(async () => {
-			try {
-				for await (const _ of matchingIterator) {
-					// Consumer will iterate; we just need to wait for completion
-				}
-			} finally {
-				handlerComplete = true;
-				if (nonMatchingResolve) nonMatchingResolve();
-			}
-		})(),
-		(async () => {
-			try {
-				for await (const _ of nonMatchingIterator) {
-					// Consumer will iterate; we just need to wait for completion
-				}
-			} finally {
-				handlerComplete = true;
-				if (matchingResolve) matchingResolve();
-			}
-		})(),
-	]).catch(() => {
-		// Silently handle any errors to avoid unhandled rejection warnings
-	});
-
 	return [matchingIterator, nonMatchingIterator];
 }
 
