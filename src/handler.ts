@@ -55,8 +55,8 @@ export class EventHandler<TObject extends object = object, TEvent extends TEvent
 	/**
 	 * Creates a new EventHandler instance.
 	 *
-	 * @param name - The name of the event type to handle. Cannot be empty.
-	 * @throws {Error} 'Event Name is Empty' - When the provided name is an empty string
+	 * @param name - The name of the event type to handle. Cannot be empty or whitespace-only.
+	 * @throws {Error} 'Event Name is Empty' - When the provided name is an empty string or contains only whitespace
 	 *
 	 * @example
 	 * ```typescript
@@ -66,7 +66,7 @@ export class EventHandler<TObject extends object = object, TEvent extends TEvent
 	 */
 	constructor(name: string) {
 		this.Name = name;
-		if (this.Name.length === 0) throw new Error('Event Name is Empty');
+		if (this.Name.length === 0 || !this.Name.trim()) throw new Error('Event Name is Empty');
 	}
 
 	/** Internal map storing active subscriptions by their unique IDs */

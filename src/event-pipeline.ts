@@ -93,6 +93,11 @@ export function ThrottleEvents<TObject extends object = object, TEvent extends T
  * @param fns - Transform functions to apply in sequence
  * @returns AsyncIterableIterator of transformed results
  *
+ * @remarks
+ * Due to the underlying Pipe utility from @pawells/typescript-common accepting `(arg: any) => any`,
+ * the transform functions must use implicit typing or explicit any casts. The first function
+ * receives the event, and subsequent functions receive the output of the previous function.
+ *
  * @example
  * ```typescript
  * interface MessageEvent extends TEventData {
