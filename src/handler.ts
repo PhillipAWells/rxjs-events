@@ -9,6 +9,10 @@ import { TEventFunction } from './event-function.js';
  * @template TObject - The type of data objects that can be triggered as events
  * @template TEvent - The event data type extending TEventData that will be received by subscribers
  *
+ * @remarks
+ * **Error Handling:** Subscribe-based handlers log errors to console.error and stop receiving events.
+ * For in-band error propagation, use GetAsyncIterableIterator() instead, which throws on errors.
+ *
  * @example
  * ```typescript
  * interface MessageData {
@@ -34,7 +38,7 @@ import { TEventFunction } from './event-function.js';
  * // Unsubscribe
  * handler.Unsubscribe(subscription);
  *
- * // Async iteration
+ * // Async iteration (propagates errors)
  * for await (const event of handler.GetAsyncIterableIterator()) {
  *   console.log('Async event:', event.MessageReceived.text);
  *   break; // Important: break to avoid infinite loop
