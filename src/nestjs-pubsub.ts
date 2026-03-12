@@ -209,7 +209,6 @@ export class EventHandlerPubSub implements IPubSubEngine {
 
 		return (async function* (): AsyncIterableIterator<T> {
 			const iterators = handlers.map((h) => h.GetAsyncIterableIterator());
-			const deferreds: Promise<IteratorResult<T>>[] = [];
 			let activeIterators = iterators.length;
 
 			try {

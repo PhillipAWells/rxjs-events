@@ -87,7 +87,6 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 	const nonMatchingQueue: TEvent[] = [];
 	let matchingResolve: (() => void) | undefined;
 	let nonMatchingResolve: (() => void) | undefined;
-	let handlerComplete = false;
 
 	// Subscribe to the handler and distribute events to appropriate queues
 	const subscriptionId = handler.Subscribe((event) => {
@@ -115,7 +114,7 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 					return { done: true, value: undefined };
 				}
 
-				while (queue.length === 0 && !handlerComplete) {
+				while (queue.length === 0) {
 					await new Promise<void>((resolve) => {
 						if (queue === matchingQueue) {
 							matchingResolve = resolve;
