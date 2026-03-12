@@ -87,7 +87,9 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 	const nonMatchingQueue: TEvent[] = [];
 	let matchingResolve: (() => void) | undefined;
 	let nonMatchingResolve: (() => void) | undefined;
-	let handlerComplete = false;
+
+	// Track reference count for proper cleanup
+	let activeIterators = 2;
 
 	// Subscribe to the handler and distribute events to appropriate queues
 	const subscriptionId = handler.Subscribe((event) => {
@@ -115,7 +117,7 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 					return { done: true, value: undefined };
 				}
 
-				while (queue.length === 0 && !handlerComplete) {
+				while (queue.length === 0) {
 					await new Promise<void>((resolve) => {
 						if (queue === matchingQueue) {
 							matchingResolve = resolve;
@@ -140,7 +142,11 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 			async return(): Promise<IteratorResult<TEvent>> {
 				await Promise.resolve();
 				closed = true;
-				handler.Unsubscribe(subscriptionId);
+				activeIterators--;
+				// Only unsubscribe when all iterators have closed
+				if (activeIterators === 0) {
+					handler.Unsubscribe(subscriptionId);
+				}
 				return { done: true, value: undefined };
 			},
 		};
@@ -149,32 +155,6 @@ export function PartitionEvents<TEvent extends TEventData = TEventData>(
 	// Create iterators that share the same queues and handler
 	const matchingIterator = createIterator(matchingQueue);
 	const nonMatchingIterator = createIterator(nonMatchingQueue);
-
-	// Add destroy handlers to both iterators to clean up when iteration is done
-	Promise.allSettled([
-		(async () => {
-			try {
-				for await (const _ of matchingIterator) {
-					// Consumer will iterate; we just need to wait for completion
-				}
-			} finally {
-				handlerComplete = true;
-				if (nonMatchingResolve) nonMatchingResolve();
-			}
-		})(),
-		(async () => {
-			try {
-				for await (const _ of nonMatchingIterator) {
-					// Consumer will iterate; we just need to wait for completion
-				}
-			} finally {
-				handlerComplete = true;
-				if (matchingResolve) matchingResolve();
-			}
-		})(),
-	]).catch(() => {
-		// Silently handle any errors to avoid unhandled rejection warnings
-	});
 
 	return [matchingIterator, nonMatchingIterator];
 }

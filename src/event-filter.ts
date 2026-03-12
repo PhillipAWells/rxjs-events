@@ -1,4 +1,4 @@
-import { ObjectGetPropertyByPath } from '@pawells/typescript-common';
+import { ObjectFilter } from '@pawells/typescript-common';
 import { TEventData } from './event-data.js';
 import { IFilterCriteria } from './filter-criteria.js';
 import { TExtractEventPayload } from './extract-event-payload.js';
@@ -85,21 +85,7 @@ export function EventFilter<TEvent extends TEventData = TEventData>(
 
 	if (!payload) throw new Error('No Payload');
 
-	for (const [key, filterValue] of Object.entries(args)) {
-		// Support nested paths using dot notation
-		const payloadValue = ObjectGetPropertyByPath(payload as Record<string, unknown>, key);
-
-		// Support predicate functions as filter values
-		if (typeof filterValue === 'function') {
-			const predicate = filterValue as (value: unknown) => boolean;
-			if (!predicate(payloadValue)) return false;
-		} else {
-			// Standard equality check
-			if (payloadValue !== filterValue) return false;
-		}
-	}
-
-	return true;
+	return ObjectFilter(payload, args as Record<string, unknown>);
 }
 
 /**

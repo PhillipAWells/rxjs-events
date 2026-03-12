@@ -1,7 +1,7 @@
 {
 	"name": "@pawells/rxjs-events",
 	"displayName": "RxJS Events",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"description": "RxJS-based event handling library with reactive observables and async event streams.",
 	"type": "module",
 	"main": "./build/index.js",
@@ -23,26 +23,27 @@
 		"test": "vitest run",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
+		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build",
 		"prepublishOnly": "npm run build",
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@pawells/typescript-common": "^1.1.6",
+		"@pawells/typescript-common": "^1.4.1",
 		"rxjs": "^7.8.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@stylistic/eslint-plugin": "^5.9.0",
-		"@types/node": "^25.3.0",
+		"@stylistic/eslint-plugin": "^5.10.0",
+		"@types/node": "^25.3.3",
 		"@typescript-eslint/eslint-plugin": "^8.56.1",
 		"@typescript-eslint/parser": "^8.56.1",
 		"@vitest/coverage-v8": "^4.0.18",
 		"@vitest/ui": "^4.0.18",
-		"eslint": "^10.0.2",
+		"eslint": "^10.0.3",
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"eslint-plugin-import": "^2.31.0",
 		"eslint-plugin-unused-imports": "^4.0.0",
-		"globals": "^17.3.0",
+		"globals": "^17.4.0",
 		"husky": "^9.1.7",
 		"typescript": "^5.3.3",
 		"vitest": "^4.0.18"
@@ -67,7 +68,7 @@
 	},
 	"homepage": "https://github.com/PhillipAWells/rxjs-events#readme",
 	"engines": {
-		"node": ">=24.0.0"
+		"node": ">=22.0.0"
 	},
 	"packageManager": "yarn@4.12.0",
 	"files": [

@@ -9,6 +9,10 @@ import { TEventFunction } from './event-function.js';
  * @template TObject - The type of data objects that can be triggered as events
  * @template TEvent - The event data type extending TEventData that will be received by subscribers
  *
+ * @remarks
+ * **Error Handling:** Subscribe-based handlers log errors to console.error and stop receiving events.
+ * For in-band error propagation, use GetAsyncIterableIterator() instead, which throws on errors.
+ *
  * @example
  * ```typescript
  * interface MessageData {
@@ -34,7 +38,7 @@ import { TEventFunction } from './event-function.js';
  * // Unsubscribe
  * handler.Unsubscribe(subscription);
  *
- * // Async iteration
+ * // Async iteration (propagates errors)
  * for await (const event of handler.GetAsyncIterableIterator()) {
  *   console.log('Async event:', event.MessageReceived.text);
  *   break; // Important: break to avoid infinite loop
@@ -51,8 +55,8 @@ export class EventHandler<TObject extends object = object, TEvent extends TEvent
 	/**
 	 * Creates a new EventHandler instance.
 	 *
-	 * @param name - The name of the event type to handle. Cannot be empty.
-	 * @throws {Error} 'Event Name is Empty' - When the provided name is an empty string
+	 * @param name - The name of the event type to handle. Cannot be empty or whitespace-only.
+	 * @throws {Error} 'Event Name is Empty' - When the provided name is an empty string or contains only whitespace
 	 *
 	 * @example
 	 * ```typescript
@@ -62,7 +66,7 @@ export class EventHandler<TObject extends object = object, TEvent extends TEvent
 	 */
 	constructor(name: string) {
 		this.Name = name;
-		if (this.Name.length === 0) throw new Error('Event Name is Empty');
+		if (this.Name.length === 0 || !this.Name.trim()) throw new Error('Event Name is Empty');
 	}
 
 	/** Internal map storing active subscriptions by their unique IDs */

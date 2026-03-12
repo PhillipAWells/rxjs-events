@@ -34,7 +34,9 @@ export function DebounceEvents<TObject extends object = object, TEvent extends T
 ): EventHandler<TObject, TEvent> {
 	const debouncedHandler = new EventHandler<TObject, TEvent>(handler.Name);
 	const debouncedTrigger = Debounce((event: TEvent) => {
-		debouncedHandler.Trigger(event as any);
+		// Extract payload from the event object before triggering to avoid double-wrapping
+		const payload = event[handler.Name as keyof TEvent] as TObject;
+		debouncedHandler.Trigger(payload);
 	}, ms);
 	handler.Subscribe((event) => debouncedTrigger(event));
 	return debouncedHandler;
@@ -72,7 +74,9 @@ export function ThrottleEvents<TObject extends object = object, TEvent extends T
 ): EventHandler<TObject, TEvent> {
 	const throttledHandler = new EventHandler<TObject, TEvent>(handler.Name);
 	const throttledTrigger = Throttle((event: TEvent) => {
-		throttledHandler.Trigger(event as any);
+		// Extract payload from the event object before triggering to avoid double-wrapping
+		const payload = event[handler.Name as keyof TEvent] as TObject;
+		throttledHandler.Trigger(payload);
 	}, ms);
 	handler.Subscribe((event) => throttledTrigger(event));
 	return throttledHandler;
@@ -88,6 +92,11 @@ export function ThrottleEvents<TObject extends object = object, TEvent extends T
  * @param handler - EventHandler to pipe events from
  * @param fns - Transform functions to apply in sequence
  * @returns AsyncIterableIterator of transformed results
+ *
+ * @remarks
+ * Due to the underlying Pipe utility from @pawells/typescript-common accepting `(arg: any) => any`,
+ * the transform functions must use implicit typing or explicit any casts. The first function
+ * receives the event, and subsequent functions receive the output of the previous function.
  *
  * @example
  * ```typescript
