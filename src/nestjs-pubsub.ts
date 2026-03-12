@@ -202,27 +202,51 @@ export class EventHandlerPubSub implements IPubSubEngine {
 	 *
 	 * @template T - The type of values yielded
 	 * @param triggers - Array of trigger names
-	 * @returns Merged async iterator
+	 * @returns Merged async iterator that yields events from all triggers concurrently
 	 */
 	private _mergeAsyncIterators<T = any>(triggers: string[]): AsyncIterableIterator<T> {
 		const handlers = triggers.map((trigger) => this._getOrCreateHandler(trigger));
 
-		const self = this;
-
 		return (async function* (): AsyncIterableIterator<T> {
 			const iterators = handlers.map((h) => h.GetAsyncIterableIterator());
-			const subscriptions: number[] = [];
+			const deferreds: Promise<IteratorResult<T>>[] = [];
+			let activeIterators = iterators.length;
 
-			// Use Promise.race to get the first event from any handler
-			// This is a simplified implementation; production systems may want more sophisticated merging
 			try {
-				for await (const event of iterators[0]) {
-					yield event as T;
+				// Create promises for each iterator's next() call
+				const createNextPromises = (): Promise<IteratorResult<T>>[] => {
+					return iterators.map((iter) =>
+						iter.next()
+							.then((result) => {
+								if (result.done) {
+									activeIterators--;
+								}
+								return result;
+							})
+							.catch((err) => {
+								activeIterators--;
+								throw err;
+							}),
+					);
+				};
+
+				let promises = createNextPromises();
+
+				while (activeIterators > 0) {
+					const result = await Promise.race(promises);
+
+					if (!result.done) {
+						yield result.value as T;
+						promises = createNextPromises();
+					}
 				}
 			} finally {
-				// Clean up subscriptions
-				await Promise.resolve();
-				subscriptions.forEach((subId) => self.unsubscribe(subId));
+				// Clean up all iterators
+				for (const iterator of iterators) {
+					if (typeof iterator.return === 'function') {
+						await iterator.return?.();
+					}
+				}
 			}
 		})();
 	}
